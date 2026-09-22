@@ -1,0 +1,40 @@
+name: taiwan
+description: UCI Default of Credit Card Clients (Taiwan, 2005). 30,000 rows, 23 features, ~22% positive.
+source: https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients
+raw_files: ["default of credit card clients.xls"]
+label: default payment next month
+id_col: ID
+time_col: null
+
+split:
+  method: stratified
+  fractions: [0.7, 0.15, 0.15]
+  seed: 42
+
+# Columns that must never become features.
+denylist: [ID, default payment next month]
+categorical: [SEX, EDUCATION, MARRIAGE]
+subgroups: {sex: SEX, age: AGE}
+
+graph:
+  # No real structure exists. Only synthetic builders apply.
+  knn: {k: [5, 10, 20], default_k: 10, pca_dims: 16}
+
+models:
+  lr:  {C: 1.0, max_iter: 2000}
+  xgb: {max_depth: 4, eta: 0.05, subsample: 0.8, colsample_bytree: 0.8, min_child_weight: 5,
+        num_boost_round: 2000, early_stopping_rounds: 100}
+  mlp: {hidden: [128, 64], dropout: 0.2, lr: 0.001, epochs: 60, batch_size: 1024, patience: 8, ckpt_every: 5}
+  gnn: {archs: [sage, gat], hidden: 64, layers: 2, dropout: 0.3, lr: 0.003, epochs: 60,
+        batch_size: 1024, fanout: [15, 10], patience: 8, ckpt_every: 5, emb_dim: 32}
+
+lupi:
+  teacher: sage
+  lambda: [0.0, 0.25, 0.5, 0.75, 1.0]
+  temperature: [1.0, 2.0, 4.0]
+  k: [5, 10, 20]
+
+business: {base_approval: 0.8, capture_frac: 0.1}
+bootstrap: {n_boot: 1000}
+
+quick: {n_rows: 5000, epochs: 2, num_boost_round: 50}

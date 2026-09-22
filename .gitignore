@@ -1,0 +1,39 @@
+# Raw and processed data (downloaded by scripts/fetch_data.sh, converted by notebook 01)
+data_raw/
+*.csv
+*.csv.gz
+*.xls
+*.xlsx
+*.npz
+*.zip
+!splits/**/*.npz
+
+# Run outputs (per-unit executed notebooks, predictions, models, checkpoints, logs)
+runs/
+report/*.html
+report/*.pdf
+
+# Quick-mode split files are throwaway
+splits/*_quick/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.conda/
+*.egg-info/
+.ipynb_checkpoints/
+.ruff_cache/
+.pytest_cache/
+
+# Secrets and local overrides
+.env
+.env.*
+kaggle.json
+.kaggle/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

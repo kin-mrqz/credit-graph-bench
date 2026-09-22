@@ -1,0 +1,2 @@
+# Frozen split files are written by notebook 01_load_and_split and then committed.
+# Naming: splits/<dataset>_seed0.npz  (and <dataset>_quick/ for QUICK=1, gitignored)

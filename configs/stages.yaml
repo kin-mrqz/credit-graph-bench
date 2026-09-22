@@ -1,0 +1,79 @@
+# Which (dataset, graph_builder, seed) units each stage runs.
+# scripts/run_stage.sh expands this via `python -m src.plan_units <stage>`.
+# "seeds: default" expands to the list below. Order here is execution order.
+
+default_seeds: [0, 1, 2, 3, 4]
+
+stage_order:
+  - 00_env_check
+  - 01_load_and_split
+  - 02_baselines_tabular
+  - 03_build_graphs
+  - 04_graph_features_xgb
+  - 05_gnn
+  - 06_hybrid
+  - 07_lupi_distill
+  - 08_calibration_stability_business
+  - 90_report
+
+stages:
+  00_env_check:
+    - {dataset: all, graph_builders: [none], seeds: [0]}
+
+  01_load_and_split:
+    - {dataset: taiwan,       graph_builders: [none], seeds: [0]}
+    - {dataset: home_credit,  graph_builders: [none], seeds: [0]}
+    - {dataset: lending_club, graph_builders: [none], seeds: [0]}
+    - {dataset: dgraphfin,    graph_builders: [none], seeds: [0]}
+
+  02_baselines_tabular:
+    - {dataset: taiwan,       graph_builders: [none], seeds: default}
+    - {dataset: home_credit,  graph_builders: [none], seeds: default}
+    - {dataset: lending_club, graph_builders: [none], seeds: default}
+    - {dataset: dgraphfin,    graph_builders: [none], seeds: default}
+
+  # Graph construction is deterministic given the split, so one seed.
+  03_build_graphs:
+    - {dataset: taiwan,       graph_builders: [knn, random_control], seeds: [0]}
+    - {dataset: home_credit,  graph_builders: [relational, knn, random_control], seeds: [0]}
+    - {dataset: lending_club, graph_builders: [shared_attribute, knn, random_control], seeds: [0]}
+    - {dataset: dgraphfin,    graph_builders: [native], seeds: [0]}
+
+  # Tier 1. Relational (Home Credit) is skipped: its hand-built aggregates are already tabular features.
+  04_graph_features_xgb:
+    - {dataset: taiwan,       graph_builders: [knn, random_control], seeds: default}
+    - {dataset: home_credit,  graph_builders: [knn, random_control], seeds: default}
+    - {dataset: lending_club, graph_builders: [shared_attribute, knn, random_control], seeds: default}
+    - {dataset: dgraphfin,    graph_builders: [native], seeds: default}
+
+  # Tier 2. Heaviest stage. DGraph-Fin first so the published range is reproduced early.
+  05_gnn:
+    - {dataset: dgraphfin,    graph_builders: [native], seeds: default}
+    - {dataset: home_credit,  graph_builders: [relational], seeds: default}
+    - {dataset: lending_club, graph_builders: [shared_attribute, knn], seeds: default}
+    - {dataset: taiwan,       graph_builders: [knn], seeds: default}
+
+  # Tier 3. Needs 05 embeddings for the same (dataset, graph_builder, seed).
+  06_hybrid:
+    - {dataset: dgraphfin,    graph_builders: [native], seeds: default}
+    - {dataset: home_credit,  graph_builders: [relational], seeds: default}
+    - {dataset: lending_club, graph_builders: [shared_attribute, knn], seeds: default}
+    - {dataset: taiwan,       graph_builders: [knn], seeds: default}
+
+  # Tier 4. Every unit also runs the self-distillation control. knn and random_control
+  # units sweep k internally.
+  07_lupi_distill:
+    - {dataset: taiwan,       graph_builders: [knn, random_control], seeds: default}
+    - {dataset: home_credit,  graph_builders: [relational, knn, random_control], seeds: default}
+    - {dataset: lending_club, graph_builders: [shared_attribute, knn, random_control], seeds: default}
+    - {dataset: dgraphfin,    graph_builders: [native], seeds: default}
+
+  # Reads predictions from 02, 04, 05, 06, 07 for a dataset and seed.
+  08_calibration_stability_business:
+    - {dataset: taiwan,       graph_builders: [all], seeds: default}
+    - {dataset: home_credit,  graph_builders: [all], seeds: default}
+    - {dataset: lending_club, graph_builders: [all], seeds: default}
+    - {dataset: dgraphfin,    graph_builders: [all], seeds: default}
+
+  90_report:
+    - {dataset: all, graph_builders: [all], seeds: [0]}

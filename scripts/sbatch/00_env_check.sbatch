@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#SBATCH --job-name=cgb_00_env_check
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --time=00:20:00
+#SBATCH --output=runs/slurm/%x_%j.out
+export STAGE=00_env_check
+source scripts/sbatch/_common.sh

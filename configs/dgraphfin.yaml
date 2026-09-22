@@ -1,0 +1,49 @@
+name: dgraphfin
+description: DGraph-Fin (Finvolution, NeurIPS 2022). 3.7M users, 4.3M emergency-contact edges, 17 features, 1.2M labelled, ~1.3% positive among labelled.
+source: https://dgraph.xinye.com
+raw_files: [DGraphFin.zip]   # manual download; the loader also accepts an already-extracted dgraphfin.npz
+label: y
+id_col: node_id
+time_col: null
+
+split:
+  method: official   # 70/15/15 random split shipped with the dataset
+  # Robustness variant: only edges with timestamp <= edge_time_cutoff are visible to the model.
+  edge_time_cutoff: 600
+
+denylist: []
+categorical: []
+subgroups: {}
+
+# Missing values are coded -1 in the raw data. The loader keeps -1 and adds a missing flag per feature
+# (Trick A in the DGraph paper), which the paper shows helps GNNs.
+features:
+  add_missing_flags: true
+
+graph:
+  native:
+    directed: true
+    symmetrize_for_training: true
+    n_edge_types: 12
+
+models:
+  lr:  {C: 1.0, max_iter: 1000}
+  xgb: {max_depth: 6, eta: 0.05, subsample: 0.8, colsample_bytree: 0.8, min_child_weight: 50,
+        num_boost_round: 3000, early_stopping_rounds: 200, scale_pos_weight: 10}
+  mlp: {hidden: [256, 128], dropout: 0.2, lr: 0.001, epochs: 30, batch_size: 8192, patience: 5, ckpt_every: 2}
+  gnn: {archs: [sage, gat], hidden: 128, layers: 2, dropout: 0.2, lr: 0.001, epochs: 40,
+        batch_size: 4096, fanout: [20, 10], patience: 6, ckpt_every: 1, emb_dim: 64, pos_weight: 10}
+
+# Reference results from the DGraph paper (test AUC): MLP 0.723, GCN 0.751, SAGE 0.778, TGAT 0.792
+reference_auc: {mlp: 0.723, gcn: 0.751, sage: 0.778, tgat: 0.792}
+
+lupi:
+  teacher: sage
+  lambda: [0.0, 0.25, 0.5, 0.75, 1.0]
+  temperature: [1.0, 2.0, 4.0]
+  k: []   # real edges; no kNN sweep
+
+business: {base_approval: 0.8, capture_frac: 0.1}
+bootstrap: {n_boot: 500}
+
+quick: {n_rows: 200000, epochs: 2, num_boost_round: 50}

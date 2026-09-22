@@ -1,0 +1,9 @@
+# Strip notebook outputs on commit so diffs stay readable and no stale results are committed.
+# Requires: pip install nbstripout && nbstripout --install --attributes .gitattributes
+*.ipynb filter=nbstripout
+*.ipynb diff=ipynb
+
+# Shell scripts must keep LF endings when checked out on Windows
+*.sh text eol=lf
+*.sbatch text eol=lf
+Makefile text eol=lf

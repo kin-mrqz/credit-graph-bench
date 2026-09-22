@@ -1,0 +1,51 @@
+name: home_credit
+description: Home Credit Default Risk (Kaggle 2018). 307,511 loans, ~8% positive, six child tables.
+source: https://www.kaggle.com/c/home-credit-default-risk
+raw_files:
+  - application_train.csv
+  - bureau.csv
+  - bureau_balance.csv
+  - previous_application.csv
+  - installments_payments.csv
+  - POS_CASH_balance.csv
+  - credit_card_balance.csv
+label: TARGET
+id_col: SK_ID_CURR
+time_col: null   # only relative DAYS_* columns exist; no out-of-time split possible
+
+split:
+  method: stratified
+  fractions: [0.7, 0.15, 0.15]
+  seed: 42
+
+denylist: [SK_ID_CURR, TARGET]
+# Categorical columns are detected as object dtype; this list is only for columns that look numeric but are codes.
+categorical: []
+subgroups: {sex: CODE_GENDER, age: DAYS_BIRTH}
+
+graph:
+  knn: {k: [5, 10, 20], default_k: 10, pca_dims: 16}
+  relational:
+    # Reduced heterogeneous graph: customer, bureau, previous application.
+    # Monthly tables are folded into node features rather than materialised as nodes.
+    node_types: [customer, bureau, prev_app]
+    max_children_per_customer: 50
+
+models:
+  lr:  {C: 0.5, max_iter: 2000}
+  xgb: {max_depth: 6, eta: 0.03, subsample: 0.8, colsample_bytree: 0.7, min_child_weight: 20,
+        num_boost_round: 4000, early_stopping_rounds: 200}
+  mlp: {hidden: [256, 128], dropout: 0.3, lr: 0.001, epochs: 40, batch_size: 4096, patience: 5, ckpt_every: 2}
+  gnn: {archs: [sage, gat], hetero_arch: rgcn, hidden: 128, layers: 2, dropout: 0.3, lr: 0.001, epochs: 30,
+        batch_size: 2048, fanout: [20, 10], patience: 5, ckpt_every: 1, emb_dim: 64}
+
+lupi:
+  teacher: sage
+  lambda: [0.0, 0.25, 0.5, 0.75, 1.0]
+  temperature: [1.0, 2.0, 4.0]
+  k: [5, 10, 20]
+
+business: {base_approval: 0.8, capture_frac: 0.1}
+bootstrap: {n_boot: 1000}
+
+quick: {n_rows: 20000, epochs: 2, num_boost_round: 50}

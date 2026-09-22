@@ -1,0 +1,166 @@
+name: lending_club
+description: Lending Club accepted loans 2007-2018Q4 (Kaggle). Finished loans only; Charged Off = 1, Fully Paid = 0.
+source: https://www.kaggle.com/datasets/wordsforthewise/lending-club
+raw_files: [accepted_2007_to_2018Q4.csv]
+label: default
+id_col: id
+time_col: issue_d
+
+split:
+  method: time
+  train_end: "2015-12-31"
+  val_end: "2016-12-31"
+  # test = 2017-01-01 .. 2018-12-31
+
+# Origination-only information set. Everything below is recorded after issuance or is an identifier.
+denylist:
+  - id
+  - member_id
+  - url
+  - desc
+  - title
+  - loan_status
+  - default
+  - issue_d
+  - pymnt_plan
+  - funded_amnt
+  - funded_amnt_inv
+  - out_prncp
+  - out_prncp_inv
+  - total_pymnt
+  - total_pymnt_inv
+  - total_rec_prncp
+  - total_rec_int
+  - total_rec_late_fee
+  - recoveries
+  - collection_recovery_fee
+  - last_pymnt_d
+  - last_pymnt_amnt
+  - next_pymnt_d
+  - last_credit_pull_d
+  - last_fico_range_high
+  - last_fico_range_low
+  - policy_code
+  - hardship_flag
+  - hardship_type
+  - hardship_reason
+  - hardship_status
+  - deferral_term
+  - hardship_amount
+  - hardship_start_date
+  - hardship_end_date
+  - payment_plan_start_date
+  - hardship_length
+  - hardship_dpd
+  - hardship_loan_status
+  - orig_projected_additional_accrued_interest
+  - hardship_payoff_balance_amount
+  - hardship_last_payment_amount
+  - debt_settlement_flag
+  - debt_settlement_flag_date
+  - settlement_status
+  - settlement_date
+  - settlement_amount
+  - settlement_percentage
+  - settlement_term
+  - disbursement_method
+  # High-cardinality attributes are used for graph edges, not as features
+  - emp_title
+  - zip_code
+  - addr_state
+
+# Kept as features (whitelist used by the loader to limit memory on the 1.68 GB CSV)
+feature_cols:
+  - loan_amnt
+  - term
+  - int_rate
+  - installment
+  - grade
+  - sub_grade
+  - emp_length
+  - home_ownership
+  - annual_inc
+  - verification_status
+  - purpose
+  - dti
+  - delinq_2yrs
+  - earliest_cr_line
+  - fico_range_low
+  - fico_range_high
+  - inq_last_6mths
+  - mths_since_last_delinq
+  - mths_since_last_record
+  - open_acc
+  - pub_rec
+  - revol_bal
+  - revol_util
+  - total_acc
+  - initial_list_status
+  - application_type
+  - mort_acc
+  - pub_rec_bankruptcies
+  - tot_cur_bal
+  - total_bal_ex_mort
+  - acc_open_past_24mths
+  - avg_cur_bal
+  - bc_open_to_buy
+  - bc_util
+  - chargeoff_within_12_mths
+  - delinq_amnt
+  - mo_sin_old_il_acct
+  - mo_sin_old_rev_tl_op
+  - mo_sin_rcnt_rev_tl_op
+  - mo_sin_rcnt_tl
+  - mths_since_recent_bc
+  - mths_since_recent_inq
+  - num_accts_ever_120_pd
+  - num_actv_bc_tl
+  - num_actv_rev_tl
+  - num_bc_sats
+  - num_bc_tl
+  - num_il_tl
+  - num_op_rev_tl
+  - num_rev_accts
+  - num_rev_tl_bal_gt_0
+  - num_sats
+  - num_tl_120dpd_2m
+  - num_tl_30dpd
+  - num_tl_90g_dpd_24m
+  - num_tl_op_past_12m
+  - pct_tl_nvr_dlq
+  - percent_bc_gt_75
+  - tot_hi_cred_lim
+  - total_bc_limit
+  - total_il_high_credit_limit
+
+categorical: [term, grade, sub_grade, emp_length, home_ownership, verification_status, purpose,
+              initial_list_status, application_type]
+subgroups: {}
+
+graph:
+  knn: {k: [5, 10, 20], default_k: 10, pca_dims: 16}
+  shared_attribute:
+    columns: [zip_code, emp_title]
+    # Groups up to this size are fully connected; larger groups are sampled to max_degree per node.
+    max_clique: 20
+    max_degree: 10
+    min_group: 2
+
+models:
+  lr:  {C: 0.5, max_iter: 2000}
+  xgb: {max_depth: 6, eta: 0.03, subsample: 0.8, colsample_bytree: 0.7, min_child_weight: 50,
+        num_boost_round: 4000, early_stopping_rounds: 200}
+  mlp: {hidden: [256, 128], dropout: 0.3, lr: 0.001, epochs: 30, batch_size: 8192, patience: 5, ckpt_every: 2}
+  gnn: {archs: [sage, gat], hidden: 128, layers: 2, dropout: 0.3, lr: 0.001, epochs: 25,
+        batch_size: 4096, fanout: [15, 10], patience: 5, ckpt_every: 1, emb_dim: 64}
+
+lupi:
+  teacher: sage
+  lambda: [0.0, 0.25, 0.5, 0.75, 1.0]
+  temperature: [1.0, 2.0, 4.0]
+  k: [5, 10, 20]
+
+business: {base_approval: 0.8, capture_frac: 0.1}
+bootstrap: {n_boot: 1000}
+
+quick: {n_rows: 50000, epochs: 2, num_boost_round: 50}

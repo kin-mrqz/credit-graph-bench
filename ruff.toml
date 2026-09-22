@@ -1,0 +1,18 @@
+# Lint rules for src/, scripts/, and notebook code cells (via nbqa).
+line-length = 130
+target-version = "py311"
+extend-exclude = ["data_raw", "runs", ".venv"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = [
+  "E501",   # long lines in config-like dict literals are fine
+  "E702", "E703", "E701",  # notebooks use `a; b` on one line for compactness
+  "B905",   # zip strict
+  "UP037",  # quoted annotations
+  "B008",
+]
+
+[lint.per-file-ignores]
+"notebooks/*" = ["E402", "F401", "F811", "I001", "B018"]  # imports mid-notebook, re-imports, expression display
+"scripts/lint.py" = ["E402"]

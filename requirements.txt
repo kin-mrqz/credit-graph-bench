@@ -1,0 +1,22 @@
+# Runtime requirements for the GPU node.
+# PyTorch and PyTorch Geometric are installed separately by scripts/setup_env.sh
+# because their wheels depend on the CUDA version.
+numpy>=1.26
+pandas>=2.1
+pyarrow>=14
+scipy>=1.11
+scikit-learn>=1.4
+xgboost>=2.0
+pyyaml>=6.0
+matplotlib>=3.8
+tqdm>=4.66
+papermill>=2.5
+nbformat>=5.9
+nbconvert>=7.14
+jupyter>=1.0
+ipykernel>=6.29
+kaggle>=1.6
+ucimlrepo>=0.0.7
+xlrd>=2.0
+openpyxl>=3.1
+shap>=0.44

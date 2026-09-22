@@ -1,0 +1,15 @@
+# Local (laptop) requirements. Enough to lint, import-check, and edit notebooks.
+# No torch. Nothing here is meant to execute a notebook.
+numpy>=1.26
+pandas>=2.1
+pyarrow>=14
+scipy>=1.11
+scikit-learn>=1.4
+xgboost>=2.0
+pyyaml>=6.0
+matplotlib>=3.8
+nbformat>=5.9
+nbstripout>=0.7
+nbqa>=1.8
+ruff>=0.4
+pytest>=8.0

@@ -12,6 +12,8 @@ data_raw/
 runs/
 report/*.html
 report/*.pdf
+!report/*.csv
+!report/*.html
 
 # Quick-mode split files are throwaway
 splits/*_quick/

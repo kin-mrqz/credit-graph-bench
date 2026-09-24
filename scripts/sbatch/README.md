@@ -1,6 +1,6 @@
 # SLURM job files (HKU CS GPU Farm)
 
-One file per stage. Each requests one GPU, activates the environment via `scripts/env.sh`,
+One file per stage. Each requests one RTX 4080 on the `batch` partition (`--gres=gpu:rtx_4080:1`), 4 CPUs (`RestrictedCoresPerGPU`), and at most 40G memory, which is the largest request this account can submit. It activates the environment via `scripts/env.sh`,
 and calls `scripts/run_stage.sh <stage>`. Logs go to `$RUNS_ROOT/slurm/`.
 
 Submit one stage:

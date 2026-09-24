@@ -1,0 +1,8 @@
+{
+  "sizes": {
+    "train": 215258,
+    "val": 46127,
+    "test": 46126
+  },
+  "note": "stratified; written by 01_load_and_split"
+}

@@ -10,4 +10,8 @@ nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || ec
 bash scripts/run_stage.sh "$STAGE"
 STATUS=$?
 echo "[sbatch] stage=$STAGE exit=$STATUS end=$(date '+%F %T')"
-exit $STATUS
+# Return when sourced so a job file can run follow-up commands (the report export).
+if [ "${BASH_SOURCE[0]}" != "$0" ]; then
+  return "$STATUS"
+fi
+exit "$STATUS"

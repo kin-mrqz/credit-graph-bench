@@ -1,0 +1,8 @@
+{
+  "sizes": {
+    "train": 857899,
+    "val": 183862,
+    "test": 183840
+  },
+  "note": "official; written by 01_load_and_split"
+}

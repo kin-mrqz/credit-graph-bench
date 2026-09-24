@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=cgb_08_calibration
-#SBATCH --gres=gpu:1
+#SBATCH --partition=batch
+#SBATCH --gres=gpu:rtx_4080:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --time=03:00:00

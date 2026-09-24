@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 from ..paths import raw_dir
-from .base import Bundle, encode_categoricals, subsample
+from .base import Bundle, encode_categoricals, is_text_like, subsample
 
 RAW_CANDIDATES = ["accepted_2007_to_2018Q4.csv", "accepted_2007_to_2018Q4.csv.gz"]
 LABEL_MAP = {"Fully Paid": 0.0, "Charged Off": 1.0,
@@ -84,9 +84,9 @@ def build(cfg: dict, quick: bool = False) -> Bundle:
     X = df[[c for c in feature_cols if c in df.columns]].copy()
     if "term" in X.columns:
         X["term"] = X["term"].astype("string").str.extract(r"(\d+)")[0].astype(float)
-    if "int_rate" in X.columns and X["int_rate"].dtype == object:
+    if "int_rate" in X.columns and is_text_like(X["int_rate"]):
         X["int_rate"] = X["int_rate"].astype("string").str.rstrip("%").astype(float)
-    if "revol_util" in X.columns and X["revol_util"].dtype == object:
+    if "revol_util" in X.columns and is_text_like(X["revol_util"]):
         X["revol_util"] = X["revol_util"].astype("string").str.rstrip("%").astype(float)
     if "emp_length" in X.columns:
         X["emp_length"] = _emp_length(X["emp_length"])
@@ -99,8 +99,9 @@ def build(cfg: dict, quick: bool = False) -> Bundle:
     if "sub_grade" in X.columns:
         X["sub_grade"] = X["sub_grade"].map(lambda v: (ord(str(v)[0]) - 65) * 5 + int(str(v)[1]) if isinstance(v, str) and len(v) == 2 else np.nan).astype(float)
 
-    cats = [c for c in cfg.get("categorical", []) if c in X.columns and X[c].dtype == object]
-    X, cats = encode_categoricals(X, cats)
+    cats = [c for c in cfg.get("categorical", []) if c in X.columns and is_text_like(X[c])]
+    extra = [c for c in X.columns if c not in cats and is_text_like(X[c])]
+    X, cats = encode_categoricals(X, cats + extra)
     X = X.replace([np.inf, -np.inf], np.nan).astype(np.float32)
     return Bundle(
         name="lending_club", X=X, y=y, ids=ids, time=time, subgroups={}, attrs=attrs, categorical=cats,

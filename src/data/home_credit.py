@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from ..paths import raw_dir
-from .base import Bundle, apply_denylist, encode_categoricals, subsample
+from .base import Bundle, apply_denylist, encode_categoricals, is_text_like, subsample
 
 FILES = {
     "app": "application_train.csv",
@@ -47,7 +47,7 @@ def _numeric_aggregates(df: pd.DataFrame, key: str, prefix: str, stats=("mean", 
     out = g[num_cols].agg(list(stats))
     out.columns = [f"{prefix}_{a}_{b}" for a, b in out.columns]
     out[f"{prefix}_count"] = g.size()
-    obj_cols = [c for c in df.select_dtypes("object").columns][:6]  # cap width
+    obj_cols = [c for c in df.columns if is_text_like(df[c])][:6]  # cap width
     for c in obj_cols:
         top = df[c].mode(dropna=True)
         if len(top):

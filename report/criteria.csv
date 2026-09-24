@@ -1,0 +1,6 @@
+criterion,status,detail
+Tier 1 graph features = lift,FAIL,datasets with lift: ['dgraphfin (native/xgb_graphfeat)']
+Tier 2 pure GNN = lift (not expected),FAIL,datasets with lift: ['dgraphfin (native/sage)']
+Tier 3 hybrid = lift (primary candidate),FAIL,datasets with lift: ['dgraphfin (native/hybrid_sage)']
+"LUPI student received graph knowledge (beats both controls, CI > 0)",FAIL,no dataset where structured teacher beats both controls
+DGraph-Fin reproduces published AUC within 0.02,PASS,"[{'model': 'mlp', 'auc': 0.7242, 'paper_auc': 0.723}, {'model': 'sage', 'auc': 0.7805, 'paper_auc': 0.778}]"

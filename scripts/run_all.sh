@@ -43,7 +43,7 @@ done
 if [ $overall -eq 0 ]; then
   echo
   echo "[run_all] all stages complete. Exporting report..."
-  jupyter nbconvert --to html "$RUNS_ROOT/90_report/all/all/0/executed.ipynb" \
+  jupyter nbconvert --to html "$RUNS_ROOT/09_report/all/all/0/executed.ipynb" \
     --output-dir "$REPO_ROOT/report" --output gate_a_report >/dev/null 2>&1 \
     && echo "[run_all] report/gate_a_report.html" || echo "[run_all] nbconvert export failed (run make report)"
 fi

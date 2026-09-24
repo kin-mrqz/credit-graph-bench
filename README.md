@@ -33,7 +33,7 @@ scripts/     GPU setup, fetch, papermill runner, SLURM / tmux detach
 configs/     one YAML per dataset plus stage unit list
 splits/      frozen train/val/test indices (written by notebook 01, then committed)
 runs/        gitignored outputs: executed.ipynb, DONE/FAILED, predictions, ckpts
-report/      HTML/PDF of 90_report.ipynb and commercial_summary.md
+report/      HTML/PDF of 09_report.ipynb and commercial_summary.md
 ```
 
 ## Local build (laptop, no GPU, no notebook execution)

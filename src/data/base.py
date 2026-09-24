@@ -21,11 +21,25 @@ import numpy as np
 import pandas as pd
 
 
+def is_text_like(series: pd.Series) -> bool:
+    """True for object, pandas/pyarrow string, and categorical columns.
+
+    ``read_csv`` with PyArrow yields ``string[pyarrow]``, which is not ``dtype == object``.
+    Those columns still have to be encoded before a float cast.
+    """
+    dtype = series.dtype
+    return (
+        pd.api.types.is_object_dtype(dtype)
+        or pd.api.types.is_string_dtype(dtype)
+        or isinstance(dtype, pd.CategoricalDtype)
+    )
+
+
 def encode_categoricals(df: pd.DataFrame, cols: list[str] | None = None) -> tuple[pd.DataFrame, list[str]]:
-    """Encode object/category columns as int codes (-1 for missing). Returns (df, categorical_cols)."""
+    """Encode text/category columns as int codes (-1 for missing). Returns (df, categorical_cols)."""
     df = df.copy()
     if cols is None:
-        cols = [c for c in df.columns if df[c].dtype == object or str(df[c].dtype) == "category"]
+        cols = [c for c in df.columns if is_text_like(df[c])]
     for c in cols:
         if c in df.columns:
             df[c] = pd.Categorical(df[c].astype("string")).codes.astype(np.int32)

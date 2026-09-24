@@ -14,7 +14,7 @@ stage_order:
   - 06_hybrid
   - 07_lupi_distill
   - 08_calibration_stability_business
-  - 90_report
+  - 09_report
 
 stages:
   00_env_check:
@@ -75,5 +75,5 @@ stages:
     - {dataset: lending_club, graph_builders: [all], seeds: default}
     - {dataset: dgraphfin,    graph_builders: [all], seeds: default}
 
-  90_report:
+  09_report:
     - {dataset: all, graph_builders: [all], seeds: [0]}

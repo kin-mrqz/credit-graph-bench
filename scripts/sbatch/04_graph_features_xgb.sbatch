@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=cgb_04_graph_features_xgb
-#SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=48G
+#SBATCH --partition=batch
+#SBATCH --gres=gpu:rtx_4080:1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=40G
 #SBATCH --time=06:00:00
 #SBATCH --output=runs/slurm/%x_%j.out
 export STAGE=04_graph_features_xgb
